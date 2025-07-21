@@ -53,17 +53,89 @@ load_compose_file() {
     return 1
 }
 
-start_docker_services() {
-    local compose
-    compose=$(load_compose_file "${1:-docker-compose.yml}") || return 1
-    log_info "Starte Docker-Services..."
-    if docker_compose -f "$compose" up -d; then
-        log_ok "Docker-Services gestartet"
-        update_status "docker" "ok" "$DOCKER_UTILS_DIR/../../.agentnn/status.json"
+docker_compose_up() {
+    local compose_file="$1"
+    local extra_args="${2:-}"
+    
+    if [[ ! -f "$compose_file" ]]; then
+        log_err "Docker Compose Datei nicht gefunden: $compose_file"
+        return 1
+    fi
+    
+    log_info "Erkenne Docker Compose..."
+    
+    # Determine which Docker Compose command to use
+    local compose_cmd=""
+    if docker compose version &>/dev/null; then
+        compose_cmd="docker compose"
+        log_ok "Docker Compose Plugin erkannt ($(docker compose version --short))"
+    elif command -v docker-compose &>/dev/null; then
+        compose_cmd="docker-compose"
+        log_ok "Docker Compose Classic erkannt ($(docker-compose version --short))"
     else
-        log_err "Docker-Services konnten nicht gestartet werden"
+        log_err "Kein Docker Compose gefunden"
+        return 1
+    fi
+    
+    log_info "Starte Docker-Services mit $compose_cmd..."
+    
+    # Try to start services with build
+    if [[ "$extra_args" == *"--build"* ]]; then
+        log_info "Baue Docker Images..."
+        if ! $compose_cmd -f "$compose_file" build; then
+            log_warn "Docker Build fehlgeschlagen - versuche Fallback..."
+            
+            # Try with fallback Dockerfile if it exists
+            if [[ -f "$(dirname "$compose_file")/Dockerfile.fallback" ]]; then
+                log_info "Verwende Fallback Dockerfile..."
+                # Create temporary compose file with fallback dockerfile
+                local temp_compose
+                temp_compose="$(mktemp).yml"
+                sed 's|dockerfile: Dockerfile|dockerfile: Dockerfile.fallback|g' "$compose_file" > "$temp_compose"
+                
+                if $compose_cmd -f "$temp_compose" build; then
+                    log_ok "Fallback Build erfolgreich"
+                    compose_file="$temp_compose"
+                else
+                    log_err "Auch Fallback Build fehlgeschlagen"
+                    rm -f "$temp_compose"
+                    return 1
+                fi
+            else
+                log_err "Docker Build fehlgeschlagen und kein Fallback verfügbar"
+                return 1
+            fi
+        fi
+    fi
+    
+    # Start the services
+    if $compose_cmd -f "$compose_file" up -d $extra_args; then
+        log_ok "Docker-Services gestartet"
+        
+        # Service-Status prüfen
+        log_info "Service-Status:"
+        $compose_cmd -f "$compose_file" ps
+        
+        # Clean up temporary compose file if created
+        if [[ "$compose_file" == *"tmp"* ]]; then
+            rm -f "$compose_file"
+        fi
+        
+        return 0
+    else
+        log_err "Fehler beim Starten der Docker-Services"
+        # Clean up temporary compose file if created
+        if [[ "$compose_file" == *"tmp"* ]]; then
+            rm -f "$compose_file"
+        fi
         return 1
     fi
 }
 
-export -f has_docker has_docker_compose docker_compose load_compose_file start_docker_services
+start_docker_services() {
+    local compose
+    compose=$(load_compose_file "${1:-docker-compose.yml}") || return 1
+    docker_compose_up "$compose" "--build"
+}
+
+export -f has_docker has_docker_compose docker_compose load_compose_file start_docker_services docker_compose_up

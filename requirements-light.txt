@@ -3,7 +3,6 @@ openai
 mlflow
 numpy
 pandas
-torch==2.5.1
 transformers
 chromadb
 

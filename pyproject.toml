@@ -1,32 +1,3 @@
-[project]
-name = "agentnn"
-version = "1.0.0"
-description = "Modular agent execution and neural orchestration framework"
-readme = "README.md"
-license = { text = "MIT" }
-requires-python = ">=3.10"
-dependencies = [
-  "fastapi",
-  "httpx",
-  "typer",
-  "pydantic-settings",
-  "pydantic",
-  "PyYAML",
-  "tqdm",
-  "uvicorn",
-  "slowapi",
-  "aiofiles",
-  "prometheus-client",
-  "loguru",
-  "python-json-logger",
-  "aiohttp",
-  "structlog",
-  "cryptography",
-  "mlflow"
-]
-
-
-
 [tool.ruff]
 line-length = 120
 ignore = ["E402"]
@@ -54,10 +25,6 @@ extend-exclude = [
   "docs",
 ]
 
-[project.optional-dependencies]
-sdk = []
-
-
 [tool.poetry]
 name = "agentnn"
 version = "1.0.0"
@@ -81,6 +48,7 @@ pydantic = "*"
 PyYAML = "*"
 tqdm = "*"
 uvicorn = "*"
+sqlalchemy = "*"
 slowapi = "*"
 aiofiles = "*"
 prometheus-client = "*"
@@ -98,6 +66,14 @@ langchain-huggingface = "*"
 transformers = "*"
 torch = "*"
 scikit-learn = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+pytest-cov = "*"
+pytest-asyncio = "*"
+mypy = "*"
+ruff = "*"
+black = "*"
 
 [tool.poetry.extras]
 sdk = []

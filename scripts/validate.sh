@@ -1,4 +1,5 @@
 #!/bin/bash
+#!/bin/bash
 # -*- coding: utf-8 -*-
 # Umfassendes Validierungs-Script für Agent-NN
 
@@ -92,6 +93,11 @@ add_validation_result() {
     local message="$4"
     
     VALIDATION_STATS[total]=$((${VALIDATION_STATS[total]} + 1))
+    
+    # Initialize the status counter if it doesn't exist
+    if [[ -z "${VALIDATION_STATS[$status]:-}" ]]; then
+        VALIDATION_STATS[$status]=0
+    fi
     VALIDATION_STATS[$status]=$((${VALIDATION_STATS[$status]} + 1))
     
     case "$status" in
@@ -220,7 +226,7 @@ validate_python() {
     # Python-Module prüfen
     local required_modules=(requests fastapi uvicorn sqlalchemy)
     for module in "${required_modules[@]}"; do
-        if python3 -c "import $module" 2>/dev/null; then
+        if poetry run python -c "import $module" 2>/dev/null; then
             add_validation_result "python" "Module-$module" "passed" "Importierbar"
         else
             add_validation_result "python" "Module-$module" "warning" "Nicht verfügbar"
@@ -355,7 +361,7 @@ validate_docker() {
             add_validation_result "docker" "Compose-$file_name" "passed" "Compose-Datei gefunden"
             
             # Compose-Datei validieren
-            if docker compose -f "$compose_file" config >/dev/null 2>&1; then
+            if docker-compose -f "$compose_file" config >/dev/null 2>&1; then
                 add_validation_result "docker" "Compose-$file_name-Syntax" "passed" "Syntax korrekt"
             else
                 add_validation_result "docker" "Compose-$file_name-Syntax" "failed" "Syntax-Fehler"

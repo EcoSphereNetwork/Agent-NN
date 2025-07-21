@@ -24,6 +24,123 @@ source "$SCRIPT_DIR/lib/menu_utils.sh"
 source "$SCRIPT_DIR/lib/args_parser.sh"
 source "$SCRIPT_DIR/lib/config_utils.sh"
 source "$SCRIPT_DIR/lib/preset_utils.sh"
+# Utility functions
+return_to_main_menu() {
+    local delay="${1:-0}"
+    if [[ $delay -gt 0 ]]; then
+        echo
+        echo "Drücke Enter oder warte ${delay}s..."
+        read -t "$delay" -s || true
+    fi
+    clear
+}
+
+clean_environment() {
+    log_info "Bereinige Entwicklungsumgebung..."
+    
+    # Stop und entferne Docker Container
+    if [[ -f "$REPO_ROOT/docker-compose.yml" ]]; then
+        log_info "Stoppe Docker Services..."
+        docker-compose -f "$REPO_ROOT/docker-compose.yml" down --volumes --remove-orphans 2>/dev/null || true
+    fi
+    
+    # Entferne Python Virtual Environment
+    if [[ -d "$REPO_ROOT/.venv" ]]; then
+        log_info "Entferne Python Virtual Environment..."
+        rm -rf "$REPO_ROOT/.venv"
+    fi
+    
+    # Entferne Node Modules
+    if [[ -d "$REPO_ROOT/frontend/node_modules" ]]; then
+        log_info "Entferne Node Modules..."
+        rm -rf "$REPO_ROOT/frontend/node_modules"
+    fi
+    
+    # Entferne Build-Artefakte
+    local build_dirs=(
+        "$REPO_ROOT/frontend/dist"
+        "$REPO_ROOT/frontend/build"
+        "$REPO_ROOT/dist"
+        "$REPO_ROOT/build"
+        "$REPO_ROOT/__pycache__"
+        "$REPO_ROOT/.pytest_cache"
+        "$REPO_ROOT/.coverage"
+    )
+    
+    for dir in "${build_dirs[@]}"; do
+        if [[ -d "$dir" ]]; then
+            log_info "Entferne: $dir"
+            rm -rf "$dir"
+        fi
+    done
+    
+    # Entferne Log-Dateien (aber behalte das logs-Verzeichnis)
+    if [[ -d "$REPO_ROOT/logs" ]]; then
+        log_info "Bereinige Log-Dateien..."
+        find "$REPO_ROOT/logs" -name "*.log" -type f -delete 2>/dev/null || true
+    fi
+    
+    # Entferne temporäre Konfigurationsdateien
+    if [[ -f "$REPO_ROOT/.agentnn_config" ]]; then
+        log_info "Entferne temporäre Konfiguration..."
+        rm -f "$REPO_ROOT/.agentnn_config"
+    fi
+    
+    log_ok "Umgebung bereinigt"
+}
+
+show_current_config() {
+    echo
+    echo "╔══════════════════════════════════════════════════════════════════════════════╗"
+    echo "║                        Aktuelle Konfiguration                               ║"
+    echo "╚══════════════════════════════════════════════════════════════════════════════╝"
+    echo
+    
+    echo "🔧 Setup-Konfiguration:"
+    echo "   Poetry-Methode: ${POETRY_METHOD:-nicht gesetzt}"
+    echo "   Auto-Modus: ${AUTO_MODE:-false}"
+    echo "   Frontend bauen: ${BUILD_FRONTEND:-true}"
+    echo "   Docker starten: ${START_DOCKER:-true}"
+    echo "   MCP starten: ${START_MCP:-false}"
+    echo "   Preset: ${PRESET:-keines}"
+    echo
+    
+    echo "📁 Verzeichnisse:"
+    echo "   Repository: $REPO_ROOT"
+    echo "   Script-Verzeichnis: $SCRIPT_DIR"
+    echo "   Log-Datei: ${LOG_FILE:-nicht gesetzt}"
+    echo
+    
+    echo "🌐 Umgebung:"
+    echo "   Python: $(python3 --version 2>/dev/null || echo 'nicht gefunden')"
+    echo "   Node.js: $(node --version 2>/dev/null || echo 'nicht gefunden')"
+    echo "   Docker: $(docker --version 2>/dev/null | cut -d' ' -f3 | tr -d ',' || echo 'nicht gefunden')"
+    echo "   Poetry: $(poetry --version 2>/dev/null | cut -d' ' -f3 || echo 'nicht gefunden')"
+    echo
+    
+    echo "📊 Status-Dateien:"
+    if [[ -f "$PROJECT_CONFIG_FILE" ]]; then
+        echo "   Projekt-Config: $PROJECT_CONFIG_FILE (vorhanden)"
+        if [[ -s "$PROJECT_CONFIG_FILE" ]]; then
+            echo "   Gespeicherte Werte:"
+            while IFS='=' read -r key value; do
+                [[ "$key" =~ ^[[:space:]]*# ]] && continue
+                [[ -n "$key" ]] && echo "     $key = $value"
+            done < "$PROJECT_CONFIG_FILE"
+        fi
+    else
+        echo "   Projekt-Config: $PROJECT_CONFIG_FILE (nicht vorhanden)"
+    fi
+    
+    if [[ -f "$STATUS_FILE" ]]; then
+        echo "   Status-Datei: $STATUS_FILE (vorhanden)"
+    else
+        echo "   Status-Datei: ${STATUS_FILE:-nicht gesetzt} (nicht vorhanden)"
+    fi
+    
+    echo
+}
+
 # Poetry-Method initialisieren
 POETRY_METHOD="${POETRY_METHOD:-venv}"
 export POETRY_METHOD
@@ -556,7 +673,7 @@ execute_setup_mode() {
             run_step "Tests" run_project_tests
             ;;
         check)
-            run_step "Validierung" "${SCRIPT_DIR}/validate.sh" && exit 0
+            run_step "Validierung" "bash ${SCRIPT_DIR}/validate.sh" && exit 0
             ;;
         status)
             run_step "Status-Prüfung" "${SCRIPT_DIR}/status.sh" && exit 0

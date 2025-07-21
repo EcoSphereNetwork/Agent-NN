@@ -471,6 +471,33 @@ install_packages() {
     return 0
 }
 
+# Install Python dependencies using Poetry
+install_python_dependencies() {
+    log_info "Installiere Python-Abhängigkeiten mit Poetry..."
+    
+    # Ensure we're in the project directory
+    if [[ ! -f "pyproject.toml" ]]; then
+        log_err "pyproject.toml nicht gefunden. Stelle sicher, dass du im Projekt-Verzeichnis bist."
+        return 1
+    fi
+    
+    # Check if Poetry is available
+    if ! command -v poetry >/dev/null 2>&1; then
+        log_err "Poetry ist nicht verfügbar. Bitte installiere Poetry zuerst."
+        return 1
+    fi
+    
+    # Install dependencies
+    log_info "Führe 'poetry install' aus..."
+    if poetry install; then
+        log_ok "Python-Abhängigkeiten erfolgreich installiert"
+        return 0
+    else
+        log_err "Fehler beim Installieren der Python-Abhängigkeiten"
+        return 1
+    fi
+}
+
 export -f ask_install install_docker ensure_docker install_node ensure_node \
           install_python ensure_python ensure_pip install_poetry_interactive \
           prompt_poetry_installation_method map_number_to_method \
@@ -481,4 +508,4 @@ export -f ask_install install_docker ensure_docker install_node ensure_node \
           require_or_install_poetry require_or_install_nodejs \
           ensure_git ensure_curl require_or_install_git \
           require_sudo_if_needed prompt_and_install_if_missing \
-          install_packages safe_read
+          install_packages safe_read install_python_dependencies
