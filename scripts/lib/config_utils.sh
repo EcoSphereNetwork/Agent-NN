@@ -85,7 +85,7 @@ load_config_value() {
     local value
     value=$(grep -E "^${key}=" "$PROJECT_CONFIG_FILE" 2>/dev/null | head -n1 | cut -d= -f2- | tr -d '"')
     if [[ -z "$value" ]]; then
-        log_info "→ Kein gespeicherter Wert für ${key,,}, benutze Default: $default"
+        log_info "→ Kein gespeicherter Wert für ${key,,}, benutze Default: $default" >&2
         echo "$default"
     else
         echo "$value"
