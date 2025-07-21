@@ -2,34 +2,83 @@
 
 All notable changes to this project are documented in this file.
 
-## Unreleased
-- Roadmap und Codex-Konfiguration an Entwicklungsplan angepasst
-- Neue Phasenbeschreibungen in `.codex.json`
-- Aufgabenliste in `codex.tasks.json` aktualisiert
-- Basisdatenstrukturen `ModelContext` und `TaskContext` hinzugefügt
-- Microservice-Gerüste für Dispatcher, Registry, LLM-Gateway, Vector-Store,
-  Session-Manager und Example-Agent erstellt
-- MCP Python SDK eingebunden und Dispatcher-Routing implementiert
-- Sicherheitslayer mit Token-Auth, Rate-Limiting und Payload-Checks umgesetzt
-- Developer SDK und CLI eingeführt (#phase-1-sdk)
-- VectorStore-Service integriert, LLM-Gateway um `/embed` erweitert
-- Sample-Agent nutzt jetzt semantische Suche
-- SessionManager speichert ModelContext-Historien und Dispatcher/Worker
-  unterstützen optionale `session_id`
-- Einheitliches JSON-Logging und Prometheus-Metriken für alle Services
-- Persistente Speicherpfade über `.env` konfigurierbar
-- VectorStore und SessionManager unterstützen Dateispeicherung
+## v1.0.0 - 2025-07-21 🚀 **Full-Stack Release**
+
+### 🎉 Major Features
+- **🌟 Complete Full-Stack Integration**: React Frontend + FastAPI Backend Bridge
+- **💻 Modern React UI**: Built with React 19, TypeScript, Tailwind CSS
+- **⚡ One-Click Setup**: Automated system setup with `start_fullstack.sh`
+- **🔄 Real-time Communication**: WebSocket support for chat functionality
+- **📊 Comprehensive Dashboard**: System metrics, agent management, task tracking
+- **🔐 Authentication System**: Token-based security with demo login
+
+### 🎨 Frontend Features
+- Modern, responsive web interface (`frontend/agent-ui/`)
+- Agent management with real-time status
+- Task creation and monitoring
+- Interactive chat interface
+- System metrics dashboard
+- Mobile-friendly design with Tailwind CSS
+
+### 🚀 Backend Features
+- FastAPI bridge server (`server/main.py`)
+- RESTful API with OpenAPI documentation
+- Agent orchestration and management
+- Real-time WebSocket chat
+- System health monitoring
+- Mock mode for development
+
+### 🛠️ Developer Experience
+- **Automated Testing**: `test_system.sh` for comprehensive system validation
+- **Status Monitoring**: `status_check.sh` for real-time status checks  
+- **Docker Support**: Full containerization with docker-compose
+- **Development Tools**: Hot reload, TypeScript support, ESLint
+
+### 📦 New Components
+- `server/main.py` - Main backend bridge server
+- `frontend/agent-ui/` - Complete React application
+- `start_fullstack.sh` - Automated startup script
+- `test_system.sh` - System testing script
+- `status_check.sh` - Status monitoring script
+- `FULLSTACK_README.md` - Detailed setup documentation
+
+### 🔧 Technical Improvements
+- Modern Python packaging with requirements.txt
+- Vite-based frontend build system
+- Comprehensive error handling and logging
+- Responsive UI with dark/light theme support
+- Type-safe API communication with React Query
+
+### 🌐 API Endpoints
+- `/auth/login` - User authentication
+- `/agents` - Agent management CRUD
+- `/tasks` - Task management CRUD  
+- `/chat/sessions/{id}/messages` - Chat functionality
+- `/metrics/system` - System monitoring
+- `/docs` - Interactive API documentation
+
+### ⚡ Quick Start
+```bash
+git clone https://github.com/EcoSphereNetwork/Agent-NN.git
+cd Agent-NN
+bash start_fullstack.sh
+# Access: http://localhost:3001
+```
+
+### 📊 System Requirements
+- Python 3.10+
+- Node.js 18+
+- 4+ GB RAM
+- Modern web browser
+
+---
+
+## Previous Versions
 
 ## v1.0.0-beta
 - Deployment-Skripte und Dokumentation fertiggestellt
 - Erste Beta-Version mit stabilem SDK und CLI
 - HTTP-Schnittstellen eingefroren
-
-## v1.0.0
-- Deployment-Skripte und Dokumentation fertiggestellt
-- Erste stabile Version
-- SDKs und Release-Dokumente
-- Production Docker Compose
 
 ## v1.0.1
 - Bidirektionale Flowise-Integration
