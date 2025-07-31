@@ -152,7 +152,7 @@ verify_installation() {
     if ! command -v poetry >/dev/null 2>&1; then
         log_warn "Poetry nicht im PATH gefunden"
         # Try alternative locations
-        if [[ -f "$HOME/.agentnn_venv/bin/poetry" ]]; then
+        if [[ -f "$REPO_ROOT/.venv/bin/poetry" ]]; then
             log_ok "Poetry in virtueller Umgebung gefunden"
         else
             log_err "Poetry nicht gefunden"

@@ -342,14 +342,14 @@ install_poetry_fixed() {
             python3 -m pip install --break-system-packages poetry >/dev/null 2>&1
             ;;
         venv)
-            if python3 -m venv "$HOME/.agentnn_venv"; then
-                source "$HOME/.agentnn_venv/bin/activate"
+            if python3 -m venv "$REPO_ROOT/.venv"; then
+                source "$REPO_ROOT/.venv/bin/activate"
                 pip install poetry >/dev/null 2>&1
-                
+
                 # Füge zu .bashrc hinzu falls nicht vorhanden
-                if ! grep -q "agentnn_venv" "$HOME/.bashrc" 2>/dev/null; then
-                    echo "# Agent-NN Poetry venv" >> "$HOME/.bashrc"
-                    echo "source $HOME/.agentnn_venv/bin/activate" >> "$HOME/.bashrc"
+                if ! grep -q "agentnn_repo_venv" "$HOME/.bashrc" 2>/dev/null; then
+                    echo "# Agent-NN venv" >> "$HOME/.bashrc"
+                    echo "source $REPO_ROOT/.venv/bin/activate # agentnn_repo_venv" >> "$HOME/.bashrc"
                 fi
             else
                 return 1
