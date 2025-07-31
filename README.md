@@ -31,6 +31,12 @@
 git clone https://github.com/EcoSphereNetwork/Agent-NN.git
 cd Agent-NN
 
+# Setup
+bash ./scripts/setup.sh --full
+
+# For other options
+# bash ./scripts/setup.sh --help
+
 # System testen
 bash test_system.sh
 
