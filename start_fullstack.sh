@@ -14,18 +14,26 @@ NC='\033[0m' # No Color
 
 # Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+# The script lives in the project root, so use that directly
+PROJECT_ROOT="$SCRIPT_DIR"
 
 echo -e "${BLUE}=== Agent-NN Full Stack Startup ===${NC}"
 echo -e "${BLUE}Project root: ${PROJECT_ROOT}${NC}"
 
 # Function to check if a port is in use
 check_port() {
-    if netstat -tuln | grep -q ":$1 "; then
-        return 0  # Port is in use
-    else
-        return 1  # Port is free
-    fi
+    local port="$1"
+    python3 - "$port" <<'PY'
+import socket, sys
+port = int(sys.argv[1])
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+try:
+    s.settimeout(1)
+    s.connect(("127.0.0.1", port))
+except Exception:
+    sys.exit(1)
+sys.exit(0)
+PY
 }
 
 # Function to kill process on port
@@ -34,24 +42,12 @@ kill_port() {
     echo -e "${YELLOW}Killing processes on port $port...${NC}"
     
     # Find and kill processes using the port
-    local pids=$(netstat -tulnp 2>/dev/null | grep ":$port " | awk '{print $7}' | cut -d'/' -f1 | grep -E '^[0-9]+$' | sort -u)
-    
-    for pid in $pids; do
-        if [ ! -z "$pid" ] && [ "$pid" != "-" ]; then
-            echo -e "${YELLOW}Killing process $pid on port $port${NC}"
-            kill -9 "$pid" 2>/dev/null || true
-        fi
-    done
-    
-    # Alternative method using lsof if available
     if command -v lsof &> /dev/null; then
-        local pids=$(lsof -ti:$port 2>/dev/null || true)
-        for pid in $pids; do
-            if [ ! -z "$pid" ]; then
-                echo -e "${YELLOW}Killing process $pid on port $port (lsof)${NC}"
-                kill -9 "$pid" 2>/dev/null || true
-            fi
-        done
+        lsof -ti:$port 2>/dev/null | xargs -r kill -9 2>/dev/null || true
+    elif command -v fuser &> /dev/null; then
+        fuser -k "${port}/tcp" 2>/dev/null || true
+    else
+        echo -e "${RED}Unable to automatically free port $port. Please close the process manually.${NC}"
     fi
 }
 
