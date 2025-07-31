@@ -95,9 +95,9 @@ If Poetry installation fails:
 # Try manual installation
 curl -sSL https://install.python-poetry.org | python3 -
 
-# Or use the venv method
-python3 -m venv ~/.agentnn_venv
-source ~/.agentnn_venv/bin/activate
+# Or use the venv method within the project
+python3 -m venv ./Agent-NN/.venv
+source ./Agent-NN/.venv/bin/activate
 pip install poetry
 ```
 

@@ -15,7 +15,6 @@ from uuid import uuid4
 from fastapi import FastAPI, HTTPException, Security, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 # Add project root to path

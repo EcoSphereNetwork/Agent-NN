@@ -236,11 +236,12 @@ install_poetry_break_system() {
 }
 
 install_poetry_venv() {
-    log_info "Installiere Poetry in ~/.agentnn_venv..."
-    python3 -m venv "$HOME/.agentnn_venv" && \
-    source "$HOME/.agentnn_venv/bin/activate" && \
+    log_info "Installiere Poetry im Projektverzeichnis..."
+    python3 -m venv "$REPO_ROOT/.venv" && \
+    source "$REPO_ROOT/.venv/bin/activate" && \
     pip install poetry >/dev/null && \
-    grep -q "agentnn_venv" "$HOME/.bashrc" 2>/dev/null || echo "source $HOME/.agentnn_venv/bin/activate" >> "$HOME/.bashrc"
+    grep -q "agentnn_repo_venv" "$HOME/.bashrc" 2>/dev/null || \
+        echo "source $REPO_ROOT/.venv/bin/activate # agentnn_repo_venv" >> "$HOME/.bashrc"
 }
 
 install_poetry_pipx() {
