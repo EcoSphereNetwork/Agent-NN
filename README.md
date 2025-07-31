@@ -37,6 +37,12 @@ bash ./scripts/setup.sh --full
 # For other options
 # bash ./scripts/setup.sh --help
 
+# Sollte der Poetry-Schritt scheitern, hilft oft ein erneuter Aufruf mit
+#
+# ```bash
+# poetry install --no-root
+# ```
+
 # System testen
 bash test_system.sh
 

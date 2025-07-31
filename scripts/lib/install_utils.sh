@@ -494,6 +494,11 @@ install_python_dependencies() {
         log_ok "Python-Abhängigkeiten erfolgreich installiert"
         return 0
     else
+        log_warn "poetry install fehlgeschlagen – versuche fallback mit '--no-root'"
+        if poetry install --no-root; then
+            log_ok "Python-Abhängigkeiten mit --no-root installiert"
+            return 0
+        fi
         log_err "Fehler beim Installieren der Python-Abhängigkeiten"
         return 1
     fi
